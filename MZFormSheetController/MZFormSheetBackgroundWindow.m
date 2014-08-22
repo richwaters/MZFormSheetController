@@ -95,8 +95,15 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
     // Iterate over every window from back to front
     for (UIWindow *window in [[UIApplication sharedApplication] windows])
     {
+        if( [window isKindOfClass:[MZFormSheetBackgroundWindow class]] ) {
+            break ;  // R.A.W.
+        }
         if ((![window respondsToSelector:@selector(screen)] || [window screen] == [UIScreen mainScreen]) && window.tag != MZFormSheetControllerWindowTag && ![window isKindOfClass:[MZFormSheetBackgroundWindow class]])
         {
+            if( window.isHidden ) {
+                continue ; // R.A.W.
+            }
+
             // -renderInContext: renders in the coordinate space of the layer,
             // so we must first apply the layer's geometry to the graphics context
             CGContextSaveGState(context);
@@ -232,7 +239,8 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
                                                      name:UIApplicationDidChangeStatusBarOrientationNotification
                                                    object:nil];
         
-        [[NSNotificationCenter defaultCenter] addObserver:self
+        /*
+         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(didChangeStatusBarFrameNotificationHandler:)
                                                      name:UIApplicationDidChangeStatusBarFrameNotification
                                                    object:nil];
@@ -241,6 +249,7 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
                                                  selector:@selector(didOrientationChangeNotificationHandler:)
                                                      name:UIDeviceOrientationDidChangeNotification
                                                    object:nil];
+         */
 
     }
     return self;
@@ -275,6 +284,10 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
 - (void)didChangeStatusBarOrientationNotificationHandler:(NSNotification *)notification
 {
     [self rotateWindow];
+    
+    if (self.backgroundBlurEffect) {
+        [self updateBlurUsingContext:YES];
+    }
 
     if ([self.formSheetBackgroundWindowDelegate respondsToSelector:@selector(formSheetBackgroundWindow:didChangeStatusBarToOrientation:)]) {
         NSNumber *orientation = notification.userInfo[UIApplicationStatusBarOrientationUserInfoKey];
