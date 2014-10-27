@@ -26,6 +26,7 @@
 #import "MZFormSheetBackgroundWindow.h"
 #import <QuartzCore/QuartzCore.h>
 #import "UIImage+Additional.h"
+#import "MZMacro.h"
 
 CGFloat const MZFormSheetControllerDefaultBackgroundOpacity = 0.5;
 CGFloat const MZFormSheetControllerDefaultBackgroundBlurRadius = 2.0;
@@ -37,6 +38,7 @@ UIWindowLevel const MZFormSheetBackgroundWindowLevelBelowStatusBar = 2;
 extern CGFloat MZFormSheetControllerWindowTag;
 
 static CGFloat const UIInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientation) {
+    
     switch (orientation)
     {
         case UIInterfaceOrientationPortraitUpsideDown: return M_PI;
@@ -62,6 +64,9 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
 
 #pragma mark - Class methods
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wwarning-flag"
+
 + (void)initialize
 {
     if (self == [MZFormSheetBackgroundWindow class]) {
@@ -74,6 +79,8 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
     }
 }
 
+#pragma clang diagnostic pop
+
 + (id)appearance
 {
     return [MZAppearance appearanceForClass:[self class]];
@@ -82,13 +89,7 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
 + (UIImage *)screenshotUsingContext:(BOOL)useContext
 {
     // Create a graphics context with the target size
-    // On iOS 4 and later, use UIGraphicsBeginImageContextWithOptions to take the scale into consideration
-    // On iOS prior to 4, fall back to use UIGraphicsBeginImageContext
-    CGSize imageSize = [[UIScreen mainScreen] bounds].size;
-    if (NULL != UIGraphicsBeginImageContextWithOptions)
-        UIGraphicsBeginImageContextWithOptions(imageSize, NO, 0);
-    else
-        UIGraphicsBeginImageContext(imageSize);
+    UIGraphicsBeginImageContextWithOptions([[UIScreen mainScreen] bounds].size, NO, 0);
 
     CGContextRef context = UIGraphicsGetCurrentContext();
 
@@ -310,13 +311,16 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
 
 - (UIImage *)rotateImageToStatusBarOrientation:(UIImage *)image
 {
-    if ([self windowOrientation] == UIInterfaceOrientationLandscapeLeft) {
-        return [image imageRotatedByDegrees:90];
-    } else if ([self windowOrientation] == UIInterfaceOrientationLandscapeRight) {
-        return [image imageRotatedByDegrees:-90];
-    } else if ([self windowOrientation] == UIInterfaceOrientationPortraitUpsideDown) {
-        return [image imageRotatedByDegrees:180];
+    if (MZSystemVersionLessThan_iOS8()) {
+        if ([self windowOrientation] == UIInterfaceOrientationLandscapeLeft) {
+            return [image imageRotatedByDegrees:90];
+        } else if ([self windowOrientation] == UIInterfaceOrientationLandscapeRight) {
+            return [image imageRotatedByDegrees:-90];
+        } else if ([self windowOrientation] == UIInterfaceOrientationPortraitUpsideDown) {
+            return [image imageRotatedByDegrees:180];
+        }
     }
+    
     return image;
 }
 
@@ -367,7 +371,7 @@ static UIInterfaceOrientationMask const UIInterfaceOrientationMaskFromOrientatio
 {
     CGFloat angle = UIInterfaceOrientationAngleOfOrientation([self windowOrientation]);
     CGAffineTransform transform = CGAffineTransformMakeRotation(angle);
-
+    
     [self makeTransform:transform forView:self.backgroundImageView inFrame:self.bounds];
 }
 
