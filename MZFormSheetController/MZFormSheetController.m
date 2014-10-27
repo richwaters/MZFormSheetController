@@ -241,9 +241,6 @@ static BOOL MZFromSheetControllerIsViewControllerBasedStatusBarAppearance(void) 
 
 + (CGFloat)statusBarHeight
 {
-    // R.A.W.
-    return MIN(  [UIApplication sharedApplication].statusBarFrame.size.width,  [UIApplication sharedApplication].statusBarFrame.size.height) ;
-    
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
 
     if (MZSystemVersionGreaterThanOrEqualTo_iOS8()) {
