@@ -23,3 +23,5 @@
 #define MZSystemVersionGreaterThanOrEqualTo_iOS7() (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_7_0)
 #define MZSystemVersionGreaterThanOrEqualTo_iOS8() (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_8_0)
 #define MZSystemVersionLessThan_iOS8() !MZSystemVersionGreaterThanOrEqualTo_iOS8()
+
+
